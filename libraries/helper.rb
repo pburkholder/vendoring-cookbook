@@ -1,9 +1,7 @@
-require 'net/http'
-require 'uri'
+# libraries/helper.rb:
+require 'excon'
 
 def http_status
-  uri = URI('http://google.com/')
-  res = Net::HTTP.get_response(uri)
-
-  res.code
+  response = Excon.get('http://google.com/')
+  response.status
 end
