@@ -50,3 +50,34 @@ def http_status
   res.code
 end
 ```
+
+Now see how that it works:
+
+```
+> git checkout v1
+> kitchen verify
+```
+
+## Solution 2: Install gem at compile time, and be lazy
+
+```
+# libraries/helper.rb:
+
+def http_status
+  require 'excon'  # move 'require' into code not evaluated at compile time
+  response = Excon.get('http://google.com/')
+  response.status.to_s
+end
+```
+
+```
+# recipes/default.rb
+chef_gem 'excon' do
+  compile_time true
+  action :install
+end
+
+file '/tmp/status' do
+  content lazy { http_status }
+end
+```
