@@ -113,8 +113,53 @@ Finished in 0.07431 seconds (files took 0.26609 seconds to load)
 1 example, 0 failures
 ```
 
-## Solution 3: Use compile_time true and move library code into recipes
+## Solution 3: Utilize ruby exception handling to detect and optionally install the gem via Chef::Resource::ChefGem if necessary
+We define an array of hashes containig gems that need to exist during the compile phase.
+If they don't exist, we install them, prior to convergence.
+```
+def ensure_gem_installed(gem_name,version,libname,run_context)
+    begin
+      # try and load the library
+      require "#{libname}"
+    rescue LoadError
+      # if it can't be found, then install the gem
+      Chef::Log.warn("Installing pre-req #{gem_name} from rubygems.org ..")
+      gem = Chef::Resource::ChefGem.new(gem_name, run_context)
+      gem.version version if version
+      gem.run_action(:install)
+    end
+end
 
-## Solution 4: Vendor the gem into your cookbook
+gem_collection = [
+  { 'name'    => 'inspec',
+    'version' => '=0.11.0', # give it a version if needed
+    'libname' => 'train'},
+  { 'name'    => 'httparty',
+    'libname' => 'httparty'},  # skip the version to default to latest
+  { 'name'    => 'json', # this will already be installed as part of the chef-client so it will be skipped
+    'libname' => 'json'},
+]
 
-## Variation 5: How to use a newer gem than what Chef Omnibus installs
+run_context = Chef::RunContext.new(Chef::Node.new, {}, Chef::EventDispatch::Dispatcher.new)
+
+gem_collection.each do |gem|
+  # during compile phase, ensure that the gem is installed
+  ensure_gem_installed(gem['name'],gem['version'],gem['libname'],run_context)
+  require "#{gem['libname']}"
+end
+
+def httparty_status
+  response = HTTParty.get('http://google.com')
+  response.code.to_s
+end
+
+def train_opts_ssh
+  Train.options('ssh').to_s
+end
+```
+
+## Solution 4: Use compile_time true and move library code into recipes
+
+## Solution 5: Vendor the gem into your cookbook
+
+## Variation 6: How to use a newer gem than what Chef Omnibus installs
