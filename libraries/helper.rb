@@ -50,3 +50,29 @@ end
 def train_opts_ssh
   Train.options('ssh').to_s
 end
+
+#
+# Solution 4 (use compile_time true in the consuming recipe)
+
+begin
+  require "pony"
+rescue LoadError
+  Chef::Log.warn "waiting to load pony"
+end
+
+def pony_perms
+  Pony.permissable_options.to_s
+end
+
+#
+# Solution 5 (vendor the gem into the cookbook)
+$LOAD_PATH.unshift *Dir[File.expand_path('../../files/default/vendor/gems/**/lib', __FILE__)]
+$LOAD_PATH.unshift *Dir[File.expand_path('..', __FILE__)]
+
+require 'rest-client'
+
+def rest_status
+  require 'rest-client'
+  response = RestClient.get 'http://google.com'
+  response.code.to_s
+end

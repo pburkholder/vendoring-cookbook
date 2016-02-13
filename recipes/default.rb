@@ -15,3 +15,17 @@ end
 file '/tmp/train_opts_ssh' do
   content train_opts_ssh
 end
+
+file '/tmp/rest_status' do
+  content rest_status
+end
+
+chef_gem 'pony' do
+    compile_time true
+end
+
+require 'pony'
+
+file '/tmp/pony' do
+  content pony_perms
+end

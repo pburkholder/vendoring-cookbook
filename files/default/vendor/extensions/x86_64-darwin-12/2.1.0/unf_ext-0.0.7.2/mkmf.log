@@ -1,0 +1,33 @@
+have_library: checking for main() in -lstdc++... -------------------- yes
+
+"clang -o conftest -I/opt/chefdk/embedded/include/ruby-2.1.0/x86_64-darwin12.0 -I/opt/chefdk/embedded/include/ruby-2.1.0/ruby/backward -I/opt/chefdk/embedded/include/ruby-2.1.0 -I. -I/opt/chefdk/embedded/include -I/opt/chefdk/embedded/include/ncurses -arch x86_64 -m64 -O3 -g -pipe -Qunused-arguments -I/opt/chefdk/embedded/include -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE -D_DARWIN_UNLIMITED_SELECT -D_REENTRANT   -I/opt/chefdk/embedded/include -I/opt/chefdk/embedded/include/ncurses -arch x86_64 -O3 -g -pipe -Qunused-arguments -fno-common conftest.c  -L. -L/opt/chefdk/embedded/lib -L/opt/chefdk/embedded/lib -L. -L/opt/chefdk/embedded/lib -arch x86_64 -fstack-protector -L/opt/chefdk/embedded/lib   -m64   -lruby.2.1.0  -lpthread -ldl -lobjc "
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: int main(int argc, char **argv)
+4: {
+5:   return 0;
+6: }
+/* end */
+
+"clang -o conftest -I/opt/chefdk/embedded/include/ruby-2.1.0/x86_64-darwin12.0 -I/opt/chefdk/embedded/include/ruby-2.1.0/ruby/backward -I/opt/chefdk/embedded/include/ruby-2.1.0 -I. -I/opt/chefdk/embedded/include -I/opt/chefdk/embedded/include/ncurses -arch x86_64 -m64 -O3 -g -pipe -Qunused-arguments -I/opt/chefdk/embedded/include -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE -D_DARWIN_UNLIMITED_SELECT -D_REENTRANT   -I/opt/chefdk/embedded/include -I/opt/chefdk/embedded/include/ncurses -arch x86_64 -O3 -g -pipe -Qunused-arguments -fno-common conftest.c  -L. -L/opt/chefdk/embedded/lib -L/opt/chefdk/embedded/lib -L. -L/opt/chefdk/embedded/lib -arch x86_64 -fstack-protector -L/opt/chefdk/embedded/lib   -m64   -lruby.2.1.0 -lstdc++  -lpthread -ldl -lobjc "
+checked program was:
+/* begin */
+ 1: #include "ruby.h"
+ 2: 
+ 3: /*top*/
+ 4: extern int t(void);
+ 5: int main(int argc, char **argv)
+ 6: {
+ 7:   if (argc > 1000000) {
+ 8:     printf("%p", &t);
+ 9:   }
+10: 
+11:   return 0;
+12: }
+13: int t(void) { void ((*volatile p)()); p = (void ((*)()))main; return 0; }
+/* end */
+
+--------------------
+
