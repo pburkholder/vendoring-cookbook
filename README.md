@@ -93,7 +93,7 @@ end
 
 ## Solution 3: Utilize ruby exception handling to detect and optionally install the gem via Chef::Resource::ChefGem if necessary
 
-We implement a helper method to facility gem install during the compile phase.
+We implement a helper method to facilitate the gem install during the compile phase.
 ```
 # libraries/helper.rb:
 
@@ -150,7 +150,7 @@ file '/tmp/train_opts_ssh' do
 end
 ```
 
-## Solution 4: Use chef_gem compile_time true and move library require into recipe
+## Solution 4: Use `chef_gem` and `compile_time true` then move library require into the recipe
 
 We rescue LoadError in the library and in the consuming recipe we use a `chef_gem` resource with `compile_time true`
 ```
