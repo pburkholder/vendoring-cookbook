@@ -4,9 +4,9 @@ clone this cookbook and run `kitchen converge` to see all the examples implement
 
 ## Problem Statement
 
-You need to use a Ruby gem in your cookbook libarary that is not part of chef-client Omnibus install.
+You need to use a Ruby gem in your cookbook library that is not part of chef-client Omnibus install.
 
-For example, you write a library that uses the 'excon' gem.
+For example, you write a library that uses the 'excon' gem; that gem does not exist on the target node.
 
 ```
 # libraries/helper.rb:
