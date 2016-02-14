@@ -1,10 +1,8 @@
 ## Problem
 
-You need to use Ruby gem libraries in your cookbook that are not part of chef-client Omnibus install.
+You need to use a Ruby gem in your cookbook libarary that is not part of chef-client Omnibus install.
 
-While this documentation stands alone, if you really want to understand what's going on, then `git clone` this cookbook, and check out the various tags.
-
-As simple, but contrived example, suppose you need to save an HTTP status code to a file, and you generally use the `excon` gem, so you want to run this:
+For example, you write a library that uses the 'excon' gem.
 
 ```
 # libraries/helper.rb:
@@ -23,12 +21,9 @@ file '/tmp/status' do
 end
 ```
 
-If you try to use with test kitchen you'll get something like this:
+When you attempt to converge the node, you receive this compile time error:
 
 ```
-> git checkout v0
-> kitchen converge
-....
 LoadError
 ---------
 cannot load such file -- excon
@@ -48,16 +43,8 @@ require 'uri'
 def http_status
   uri = URI('http://google.com/')
   res = Net::HTTP.get_response(uri)
-
   res.code
 end
-```
-
-Now see how that it works:
-
-```
-> git checkout v1
-> kitchen verify
 ```
 
 ## Solution 2: Install gem with `chef_gem`; then use `lazy` eval
@@ -100,54 +87,40 @@ file '/tmp/status' do
 end
 ```
 
-Then test:
-
-```
-> git checkout v1
-> kitchen test
-....
-excon-cookbook::default
-  File "/tmp/status"
-    content
-      should match /301/
-
-Finished in 0.07431 seconds (files took 0.26609 seconds to load)
-1 example, 0 failures
-```
-
 ## Solution 3: Utilize ruby exception handling to detect and optionally install the gem via Chef::Resource::ChefGem if necessary
-We define an array of hashes containig gems that need to exist during the compile phase.
-If they don't exist, we install them, prior to convergence.
+
+We implement a helper method to facility gem install during the compile phase.
 ```
 # libraries/helper.rb:
 
 def ensure_gem_installed(gem_name,version,libname,run_context)
-    begin
-      # try and load the library
-      require "#{libname}"
-    rescue LoadError
-      # if it can't be found, then install the gem
-      Chef::Log.warn("Installing pre-req #{gem_name} from rubygems.org ..")
-      gem = Chef::Resource::ChefGem.new(gem_name, run_context)
-      gem.version version if version
-      gem.run_action(:install)
-    end
+  begin
+    # try and load the library
+    require "#{libname}"
+  rescue LoadError
+    # if it can't be found, then install the gem
+    Chef::Log.warn("Installing pre-req #{gem_name} from rubygems.org ..")
+    gem = Chef::Resource::ChefGem.new(gem_name, run_context)
+    gem.version version if version
+    gem.run_action(:install)
+  end
 end
 
+# enumerate the gems you depend upon
 gem_collection = [
   { 'name'    => 'inspec',
     'version' => '=0.11.0', # give it a version if needed
     'libname' => 'train'},
   { 'name'    => 'httparty',
-    'libname' => 'httparty'},  # skip the version to default to latest
+    'libname' => 'httparty' },  # skip the version to default to latest
   { 'name'    => 'json', # this will already be installed as part of the chef-client so it will be skipped
-    'libname' => 'json'},
+    'libname' => 'json' },
 ]
 
 run_context = Chef::RunContext.new(Chef::Node.new, {}, Chef::EventDispatch::Dispatcher.new)
 
 gem_collection.each do |gem|
-  # during compile phase, ensure that the gem is installed
+  # during compile phase, ensure that each gem is installed
   ensure_gem_installed(gem['name'],gem['version'],gem['libname'],run_context)
   require "#{gem['libname']}"
 end
@@ -159,6 +132,17 @@ end
 
 def train_opts_ssh
   Train.options('ssh').to_s
+end
+```
+
+Use the library methods in your recipe:
+```
+file '/tmp/httparty' do
+  content httparty_status
+end
+
+file '/tmp/train_opts_ssh' do
+  content train_opts_ssh
 end
 ```
 
@@ -177,10 +161,10 @@ def pony_perms
 end
 ```
 
-In the consuming recipe:
+In the recipe:
 ```
 chef_gem 'pony' do
-    compile_time true
+  compile_time true
 end
 
 require 'pony'
@@ -191,10 +175,9 @@ end
 ```
 
 ## Solution 5: Vendor the gem into your cookbook
-This method first appeared here: https://sethvargo.com/using-gems-with-chef/
 The implementation entails installing the gem into your cookbook. In the Ruby world, this process is referred to as "vendoring a gem."
 
-For instance, to vendor the rest-client gem:
+For instance, to vendor the rest-client gem in your cookbook root:
 ```
 gem install --no-rdoc --no-ri --install-dir files/default/vendor --no-user-install rest-client
 ```
@@ -215,13 +198,13 @@ def rest_status
 end
 ```
 
-NOTE:  This approach has a couple of caveats.
+NOTE:  This approach has a few caveats.
+ - potential cookbook bloat if the gem has several dependencies
  - if the gem builds native extensions then this is not a good strategy
  - if the gem you're installing is already part of the chef-client (ex. json), then the json library from the chef-client ALWAYS is used instead of yours.  The only way to workaround is the following, using `reject`:
 
- 
- ```
+```
 $LOAD_PATH.reject! {|item| item =~ /json-/ } # this removes '/opt/chef/embedded/lib/ruby/gems/2.1.0/gems/json-1.8.3/lib'
 $LOAD_PATH.push *Dir[File.expand_path('../../files/default/vendor/gems/**/lib', __FILE__)]
 $LOAD_PATH.unshift *Dir[File.expand_path('..', __FILE__)]
- ```
+```
