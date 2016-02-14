@@ -1,4 +1,8 @@
-## Problem
+## TL;DR
+
+clone this cookbook and run `kitchen converge` to see all the examples implemented at once.
+
+## Problem Statement
 
 You need to use a Ruby gem in your cookbook libarary that is not part of chef-client Omnibus install.
 
