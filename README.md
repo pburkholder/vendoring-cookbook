@@ -110,7 +110,7 @@ end
 gem_collection = [
   { 'name'    => 'inspec',
     'version' => '=0.11.0', # give it a version if needed
-    'libname' => 'train'},
+    'libname' => 'train' },
   { 'name'    => 'httparty',
     'libname' => 'httparty' },  # skip the version to default to latest
   { 'name'    => 'json', # this will already be installed as part of the chef-client so it will be skipped
@@ -201,7 +201,7 @@ end
 NOTE:  This approach has a few caveats.
  - potential cookbook bloat if the gem has several dependencies
  - if the gem builds native extensions then this is not a good strategy
- - if the gem you're installing is already part of the chef-client (ex. json), then the json library from the chef-client ALWAYS is used instead of yours.  The only way to workaround is the following, using `reject`:
+ - if the gem you're installing is already part of the chef-client (ex. the "json" gem), then the json library from the chef-client install is ALWAYS used instead of the vendored one.  This is because the chef-client already has the "json" gem activated prior to loading the one from the vendored path.  The only way to workaround is the following, using `reject`:
 
 ```
 $LOAD_PATH.reject! {|item| item =~ /json-/ } # this removes '/opt/chef/embedded/lib/ruby/gems/2.1.0/gems/json-1.8.3/lib'
