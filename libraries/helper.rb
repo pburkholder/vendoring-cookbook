@@ -72,7 +72,6 @@ $LOAD_PATH.unshift *Dir[File.expand_path('..', __FILE__)]
 require 'rest-client'
 
 def rest_status
-  require 'rest-client'
   response = RestClient.get 'http://google.com'
   response.code.to_s
 end
