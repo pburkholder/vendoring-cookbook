@@ -11,11 +11,12 @@ end
 #
 # Solution 3 (detect and install if necessary during compile phase)
 
-def ensure_gem_installed(gem_name,version,libname,run_context)
+def ensure_gem_installed(gem_name,version,libname)
   begin
     # try and load the library
     require "#{libname}"
   rescue LoadError
+    run_context = Chef::RunContext.new(Chef::Node.new, {}, Chef::EventDispatch::Dispatcher.new)
     # if it can't be found, then install the gem
     Chef::Log.warn("Installing pre-req #{gem_name} from rubygems.org ..")
     gem = Chef::Resource::ChefGem.new(gem_name, run_context)
@@ -34,11 +35,9 @@ gem_collection = [
     'libname' => 'json' },
 ]
 
-run_context = Chef::RunContext.new(Chef::Node.new, {}, Chef::EventDispatch::Dispatcher.new)
-
 gem_collection.each do |gem|
   # during compile phase, ensure that each gem is installed
-  ensure_gem_installed(gem['name'],gem['version'],gem['libname'],run_context)
+  ensure_gem_installed(gem['name'],gem['version'],gem['libname'])
   require "#{gem['libname']}"
 end
 
