@@ -1,0 +1,13 @@
+/opt/chefdk/embedded/bin/ruby -r ./siteconf20160213-56675-x559lx.rb extconf.rb
+checking for main() in -lstdc++... yes
+creating Makefile
+
+make "DESTDIR=" clean
+
+make "DESTDIR="
+compiling unf.cc
+linking shared-object unf_ext.bundle
+
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 unf_ext.bundle ./.gem.20160213-56675-1cl41qo
+installing default unf_ext libraries
